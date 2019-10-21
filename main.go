@@ -1,4 +1,4 @@
-package shinobialerter
+package shinobiclient
 
 import (
 	"bytes"
@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-type ShinobiAlerter interface {
+type ShinobiClient interface {
 	TriggerMotion(string) (string, error)
 	RunRequest(string, string, string, string) (string, error)
 }
 
-type ShinobiAlert struct {
+type Shinobi struct {
 	netClient     *http.Client
 	shinobiConfig ShinobiConfig
 }
@@ -34,7 +34,7 @@ type ShinobiCamera struct {
 	Region string `json:"region"`
 }
 
-func New(config string) ShinobiAlerter {
+func New(config string) ShinobiClient {
 	shinobiConfig := ShinobiConfig{}
 	netClientTimeout := 10
 	var netClient = &http.Client{
@@ -43,13 +43,13 @@ func New(config string) ShinobiAlerter {
 	// ignore ssl cert warnings
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	json.Unmarshal([]byte(config), &shinobiConfig)
-	return &ShinobiAlert{
+	return &Shinobi{
 		netClient:     netClient,
 		shinobiConfig: shinobiConfig,
 	}
 }
 
-func (sa *ShinobiAlert) TriggerMotion(host string) (string, error) {
+func (sa *Shinobi) TriggerMotion(host string) (string, error) {
 	for _, camera := range sa.shinobiConfig.Cameras {
 		if camera.IP == host {
 			fmt.Println(camera.IP, sa.shinobiConfig.Server)
@@ -68,7 +68,7 @@ func (sa *ShinobiAlert) TriggerMotion(host string) (string, error) {
 	return "", nil
 }
 
-func (sa *ShinobiAlert) RunRequest(httpMethod string, URL string, apiPath string, queryParam string) (string, error) {
+func (sa *Shinobi) RunRequest(httpMethod string, URL string, apiPath string, queryParam string) (string, error) {
 	apiRequest, apiRequestErr := http.NewRequest(httpMethod, URL+apiPath, bytes.NewBuffer([]byte(queryParam)))
 	if apiRequestErr != nil {
 		return "", apiRequestErr
