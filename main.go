@@ -7,7 +7,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -133,7 +132,6 @@ func (sa *Shinobi) RunRequest(httpMethod string, URL string, apiPath string, que
 	if apiRequestErr != nil {
 		return "", apiRequestErr
 	}
-	fmt.Println(apiRequest)
 	apiResponse, apiResponseErr := sa.netClient.Do(apiRequest)
 	if apiResponseErr != nil {
 		return "", apiResponseErr
