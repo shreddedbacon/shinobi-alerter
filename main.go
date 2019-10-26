@@ -1,5 +1,7 @@
 package shinobiclient
 
+// https://shinobi.video/docs/api
+
 import (
 	"bytes"
 	"crypto/tls"
@@ -13,6 +15,10 @@ import (
 
 type ShinobiClient interface {
 	TriggerMotion(string) (string, error)
+	GetMonitors(string) (string, error)
+	GetVideos(string) (string, error)
+	GetVideosById(string, string, string) (string, error)
+	GetStartedMonitors(string) (string, error)
 	RunRequest(string, string, string, string) (string, error)
 }
 
@@ -49,10 +55,64 @@ func New(config string) ShinobiClient {
 	}
 }
 
+func (sa *Shinobi) GetVideos(cameraGroup string) (string, error) {
+	str, err := sa.RunRequest(
+		"GET",
+		sa.shinobiConfig.Server,
+		"/"+sa.shinobiConfig.Apikey+"/videos/"+cameraGroup+"/",
+		"",
+	)
+	if err != nil {
+		return "", err
+	}
+	return str, nil
+}
+
+func (sa *Shinobi) GetVideosById(cameraGroup string, cameraID string, query string) (string, error) {
+	if query != "" {
+		query = "?" + query
+	}
+	str, err := sa.RunRequest(
+		"GET",
+		sa.shinobiConfig.Server,
+		"/"+sa.shinobiConfig.Apikey+"/videos/"+cameraGroup+"/"+cameraID+query,
+		"",
+	)
+	if err != nil {
+		return "", err
+	}
+	return str, nil
+}
+
+func (sa *Shinobi) GetMonitors(cameraGroup string) (string, error) {
+	str, err := sa.RunRequest(
+		"GET",
+		sa.shinobiConfig.Server,
+		"/"+sa.shinobiConfig.Apikey+"/monitor/"+cameraGroup+"/",
+		"",
+	)
+	if err != nil {
+		return "", err
+	}
+	return str, nil
+}
+
+func (sa *Shinobi) GetStartedMonitors(cameraGroup string) (string, error) {
+	str, err := sa.RunRequest(
+		"GET",
+		sa.shinobiConfig.Server,
+		"/"+sa.shinobiConfig.Apikey+"/smonitor/"+cameraGroup+"/",
+		"",
+	)
+	if err != nil {
+		return "", err
+	}
+	return str, nil
+}
+
 func (sa *Shinobi) TriggerMotion(host string) (string, error) {
 	for _, camera := range sa.shinobiConfig.Cameras {
 		if camera.IP == host {
-			fmt.Println(camera.IP, sa.shinobiConfig.Server)
 			str, err := sa.RunRequest(
 				"GET",
 				sa.shinobiConfig.Server,
